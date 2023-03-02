@@ -1,6 +1,7 @@
-from .models import *
 from django import forms
-from django.forms.widgets import DateInput
+from django.forms.widgets import DateInput, TextInput
+
+from .models import *
 
 
 class FormSettings(forms.ModelForm):
@@ -19,6 +20,18 @@ class CustomUserForm(FormSettings):
     widget = {
         'password': forms.PasswordInput()
     }
+    profile_pic = forms.ImageField()
+
+    def __init__(self, *args, **kwargs):
+        super(CustomUserForm, self).__init__(*args, **kwargs)
+
+        if kwargs.get('instance'):
+            instance = kwargs.get('instance').admin.__dict__
+            self.fields['password'].required = False
+            for field in CustomUserForm.Meta.fields:
+                self.fields[field].initial = instance.get(field)
+            if self.instance.pk is not None:
+                self.fields['password'].widget.attrs['placeholder'] = "Fill this only if you wish to update password"
 
     def clean_email(self, *args, **kwargs):
         formEmail = self.cleaned_data['email'].lower()
@@ -36,18 +49,10 @@ class CustomUserForm(FormSettings):
 
         return formEmail
 
-    def __init__(self, *args, **kwargs):
-        super(CustomUserForm, self).__init__(*args, **kwargs)
-
-        if kwargs.get('instance'):
-            instance = kwargs.get('instance').admin.__dict__
-            self.fields['password'].required = False
-            for field in CustomUserForm.Meta.fields:
-                self.fields[field].initial = instance.get(field)
-
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name', 'email', 'password', ]
+        fields = ['first_name', 'last_name',
+                  'email', 'password', 'profile_pic', ]
 
 
 class StudentForm(CustomUserForm):
@@ -57,12 +62,16 @@ class StudentForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Student
         fields = CustomUserForm.Meta.fields + \
-            ['course', 'gender', 'address', 'profile_pic',
-                'session']
-        # widgets = {
-        #     'session_start_year': DateInput(attrs={'type': 'date'}),
-        #     'session_end_year': DateInput(attrs={'type': 'date'}),
-        # }
+            ['course', 'gender', 'address', 'session']
+
+
+class AdminForm(CustomUserForm):
+    def __init__(self, *args, **kwargs):
+        super(AdminForm, self).__init__(*args, **kwargs)
+
+    class Meta(CustomUserForm.Meta):
+        model = Admin
+        fields = CustomUserForm.Meta.fields
 
 
 class StaffForm(CustomUserForm):
@@ -72,7 +81,7 @@ class StaffForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Staff
         fields = CustomUserForm.Meta.fields + \
-            ['course', 'gender', 'address', 'profile_pic', ]
+            ['course', 'gender', 'address', ]
 
 
 class CourseForm(FormSettings):
@@ -105,3 +114,67 @@ class SessionForm(FormSettings):
             'start_year': DateInput(attrs={'type': 'date'}),
             'end_year': DateInput(attrs={'type': 'date'}),
         }
+
+
+class LeaveReportStaffForm(FormSettings):
+    def __init__(self, *args, **kwargs):
+        super(LeaveReportStaffForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = LeaveReportStaff
+        fields = ['date', 'message']
+        widgets = {
+            'date': DateInput(attrs={'type': 'date'}),
+        }
+
+
+class FeedbackStaffForm(FormSettings):
+
+    def __init__(self, *args, **kwargs):
+        super(FeedbackStaffForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = FeedbackStaff
+        fields = ['feedback']
+
+
+class LeaveReportStudentForm(FormSettings):
+    def __init__(self, *args, **kwargs):
+        super(LeaveReportStudentForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = LeaveReportStudent
+        fields = ['date', 'message']
+        widgets = {
+            'date': DateInput(attrs={'type': 'date'}),
+        }
+
+
+class FeedbackStudentForm(FormSettings):
+
+    def __init__(self, *args, **kwargs):
+        super(FeedbackStudentForm, self).__init__(*args, **kwargs)
+
+    class Meta:
+        model = FeedbackStudent
+        fields = ['feedback']
+
+
+class StudentEditForm(CustomUserForm):
+    def __init__(self, *args, **kwargs):
+        super(StudentEditForm, self).__init__(*args, **kwargs)
+
+    class Meta(CustomUserForm.Meta):
+        model = Student
+        fields = CustomUserForm.Meta.fields + \
+            ['gender', 'address', ]
+
+
+class StaffEditForm(CustomUserForm):
+    def __init__(self, *args, **kwargs):
+        super(StaffEditForm, self).__init__(*args, **kwargs)
+
+    class Meta(CustomUserForm.Meta):
+        model = Staff
+        fields = CustomUserForm.Meta.fields + \
+            ['gender', 'address', ]

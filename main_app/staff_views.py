@@ -3,8 +3,7 @@ import json
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import (HttpResponseRedirect, get_object_or_404,
-                              redirect, render)
+from django.shortcuts import (HttpResponseRedirect, get_object_or_404,redirect, render)
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -62,8 +61,10 @@ def get_students(request):
             course_id=subject.course.id, session=session)
         student_data = []
         for student in students:
-            data = {"id": student.id,
-                    "name": student.admin.last_name + " " + student.admin.first_name}
+            data = {
+                    "id": student.id,
+                    "name": student.admin.last_name + " " + student.admin.first_name
+                    }
             student_data.append(data)
         return JsonResponse(json.dumps(student_data), content_type='application/json', safe=False)
     except Exception as e:
@@ -84,10 +85,8 @@ def save_attendance(request):
         attendance.save()
 
         for student_dict in students:
-            student = get_object_or_404(
-                Student, id=student_dict.get('id'))
-            attendance_report = AttendanceReport(
-                student=student, attendance=attendance, status=student_dict.get('status'))
+            student = get_object_or_404(Student, id=student_dict.get('id'))
+            attendance_report = AttendanceReport(student=student, attendance=attendance, status=student_dict.get('status'))
             attendance_report.save()
     except Exception as e:
         return None
@@ -113,8 +112,7 @@ def get_student_attendance(request):
     attendance_date_id = request.POST.get('attendance_date_id')
     try:
         date = get_object_or_404(Attendance, id=attendance_date_id)
-        attendance_data = AttendanceReport.objects.filter(
-            attendance=date)
+        attendance_data = AttendanceReport.objects.filter(attendance=date)
         student_data = []
         for attendance in attendance_data:
             data = {"id": attendance.student.admin.id,
@@ -137,8 +135,7 @@ def update_attendance(request):
         for student_dict in students:
             student = get_object_or_404(
                 Student, admin_id=student_dict.get('id'))
-            attendance_report = get_object_or_404(
-                AttendanceReport, student=student, attendance=attendance)
+            attendance_report = get_object_or_404(AttendanceReport, student=student, attendance=attendance)
             attendance_report.status = student_dict.get('status')
             attendance_report.save()
     except Exception as e:
@@ -185,8 +182,7 @@ def staff_feedback(request):
                 obj = form.save(commit=False)
                 obj.staff = staff
                 obj.save()
-                messages.success(
-                    request, "Feedback submitted for review")
+                messages.success(request, "Feedback submitted for review")
                 return redirect(reverse('staff_feedback'))
             except Exception:
                 messages.error(request, "Could not Submit!")
@@ -197,8 +193,7 @@ def staff_feedback(request):
 
 def staff_view_profile(request):
     staff = get_object_or_404(Staff, admin=request.user)
-    form = StaffEditForm(request.POST or None, request.FILES or None,
-                         instance=staff)
+    form = StaffEditForm(request.POST or None, request.FILES or None,instance=staff)
     context = {'form': form, 'page_title': 'View/Update Profile'}
     if request.method == 'POST':
         try:
@@ -220,7 +215,7 @@ def staff_view_profile(request):
                 admin.first_name = first_name
                 admin.last_name = last_name
                 staff.address = address
-                staff.gender = gender
+                admin.gender = gender
                 admin.save()
                 staff.save()
                 messages.success(request, "Profile Updated!")
@@ -275,17 +270,19 @@ def staff_add_result(request):
             exam = request.POST.get('exam')
             student = get_object_or_404(Student, id=student_id)
             subject = get_object_or_404(Subject, id=subject_id)
-            obj, created = StudentResult.objects.get_or_create(
-                student=student, subject=subject, test=test, exam=exam)
-            if created:
-                messages.success(
-                    request, "Scores Saved")
-            else:
-                messages.success(
-                    request, "Scores Updated")
+            try:
+                data = StudentResult.objects.get(
+                    student=student, subject=subject)
+                data.exam = exam
+                data.test = test
+                data.save()
+                messages.success(request, "Scores Updated")
+            except:
+                result = StudentResult(student=student, subject=subject, test=test, exam=exam)
+                result.save()
+                messages.success(request, "Scores Saved")
         except Exception as e:
             messages.warning(request, "Error Occured While Processing Form")
-            print("Error ========> " + str(e))
     return render(request, "staff_template/staff_add_result.html", context)
 
 
@@ -303,5 +300,4 @@ def fetch_student_result(request):
         }
         return HttpResponse(json.dumps(result_data))
     except Exception as e:
-        print("Error =============++> " + str(e))
         return HttpResponse('False')

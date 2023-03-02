@@ -60,7 +60,7 @@ def add_staff(request):
             try:
                 user = CustomUser.objects.create_user(
                     email=email, password=password, user_type=2, first_name=first_name, last_name=last_name, profile_pic=passport_url)
-                user.staff.gender = gender
+                user.gender = gender
                 user.staff.address = address
                 user.staff.course = course
                 user.save()
@@ -69,10 +69,8 @@ def add_staff(request):
 
             except Exception as e:
                 messages.error(request, "Could Not Add " + str(e))
-                return render(request, 'hod_template/add_staff_template.html', context)
         else:
             messages.error(request, "Please fulfil all requirements")
-            return render(request, 'hod_template/add_staff_template.html', context)
 
     return render(request, 'hod_template/add_staff_template.html', context)
 
@@ -95,9 +93,8 @@ def add_student(request):
             filename = fs.save(passport.name, passport)
             passport_url = fs.url(filename)
             try:
-                user = CustomUser.objects.create_user(
-                    email=email, password=password, user_type=3, first_name=first_name, last_name=last_name, profile_pic=passport_url)
-                user.student.gender = gender
+                user = CustomUser.objects.create_user(email=email, password=password, user_type=3, first_name=first_name, last_name=last_name, profile_pic=passport_url)
+                user.gender = gender
                 user.student.address = address
                 user.student.session = session
                 user.student.course = course
@@ -106,10 +103,8 @@ def add_student(request):
                 return redirect(reverse('add_student'))
             except Exception as e:
                 messages.error(request, "Could Not Add: " + str(e))
-                return render(request, 'hod_template/add_student_template.html', context)
         else:
             messages.error(request, "Could Not Add: ")
-            return render(request, 'hod_template/add_student_template.html', context)
     return render(request, 'hod_template/add_student_template.html', context)
 
 
@@ -128,13 +123,10 @@ def add_course(request):
                 course.save()
                 messages.success(request, "Successfully Added")
                 return redirect(reverse('add_course'))
-                return render(request, 'hod_template/add_course_template.html')
             except:
                 messages.error(request, "Could Not Add")
-                return render(request, 'hod_template/add_course_template.html', context)
         else:
             messages.error(request, "Could Not Add")
-            return render(request, 'hod_template/add_course_template.html', context)
     return render(request, 'hod_template/add_course_template.html', context)
 
 
@@ -160,11 +152,8 @@ def add_subject(request):
 
             except Exception as e:
                 messages.error(request, "Could Not Add " + str(e))
-                return render(request, 'hod_template/add_subject_template.html', context)
-
         else:
             messages.error(request, "Fill Form Properly")
-            return render(request, 'hod_template/add_subject_template.html', context)
 
     return render(request, 'hod_template/add_subject_template.html', context)
 
@@ -237,7 +226,7 @@ def edit_staff(request, staff_id):
                     user.profile_pic = passport_url
                 user.first_name = first_name
                 user.last_name = last_name
-                staff.gender = gender
+                user.gender = gender
                 staff.address = address
                 staff.course = course
                 user.save()
@@ -246,10 +235,8 @@ def edit_staff(request, staff_id):
                 return redirect(reverse('edit_staff', args=[staff_id]))
             except Exception as e:
                 messages.error(request, "Could Not Update " + str(e))
-                return render(request, "hod_template/edit_staff_template.html", context)
         else:
             messages.error(request, "Please fil form properly")
-            return render(request, "hod_template/edit_staff_template.html", context)
     else:
         user = CustomUser.objects.get(id=staff_id)
         staff = Staff.objects.get(id=user.id)
@@ -290,7 +277,7 @@ def edit_student(request, student_id):
                 user.first_name = first_name
                 user.last_name = last_name
                 student.session = session
-                student.gender = gender
+                user.gender = gender
                 student.address = address
                 student.course = course
                 user.save()
@@ -299,11 +286,8 @@ def edit_student(request, student_id):
                 return redirect(reverse('edit_student', args=[student_id]))
             except Exception as e:
                 messages.error(request, "Could Not Update " + str(e))
-                return render(request, "hod_template/edit_student_template.html", context)
         else:
             messages.error(request, "Please Fill Form Properly!")
-            return render(request, "hod_template/edit_student_template.html", context)
-
     else:
         return render(request, "hod_template/edit_student_template.html", context)
 
@@ -324,13 +308,10 @@ def edit_course(request, course_id):
                 course.name = name
                 course.save()
                 messages.success(request, "Successfully Updated")
-                return render(request, 'hod_template/edit_course_template.html', context)
             except:
                 messages.error(request, "Could Not Update")
-                return render(request, 'hod_template/edit_course_template.html', context)
         else:
             messages.error(request, "Could Not Update")
-            return render(request, 'hod_template/edit_course_template.html', context)
 
     return render(request, 'hod_template/edit_course_template.html', context)
 
@@ -358,11 +339,8 @@ def edit_subject(request, subject_id):
                 return redirect(reverse('edit_subject', args=[subject_id]))
             except Exception as e:
                 messages.error(request, "Could Not Add " + str(e))
-                return render(request, 'hod_template/edit_subject_template.html', context)
-
         else:
             messages.error(request, "Fill Form Properly")
-            return render(request, 'hod_template/edit_subject_template.html', context)
     return render(request, 'hod_template/edit_subject_template.html', context)
 
 
@@ -377,12 +355,9 @@ def add_session(request):
                 return redirect(reverse('add_session'))
             except Exception as e:
                 messages.error(request, 'Could Not Add ' + str(e))
-                return render(request, "hod_template/add_session_template.html", context)
         else:
             messages.error(request, 'Fill Form Properly ')
-            return render(request, "hod_template/add_session_template.html", context)
-    else:
-        return render(request, "hod_template/add_session_template.html", context)
+    return render(request, "hod_template/add_session_template.html", context)
 
 
 def manage_session(request):
@@ -583,12 +558,8 @@ def admin_view_profile(request):
                 return redirect(reverse('admin_view_profile'))
             else:
                 messages.error(request, "Invalid Data Provided")
-                return render(request, "hod_template/admin_view_profile.html", context)
         except Exception as e:
-            messages.error(
-                request, "Error Occured While Updating Profile " + str(e))
-            return render(request, "hod_template/admin_view_profile.html", context)
-
+            messages.error(request, "Error Occured While Updating Profile " + str(e))
     return render(request, "hod_template/admin_view_profile.html", context)
 
 
@@ -632,10 +603,8 @@ def send_student_notification(request):
         data = requests.post(url, data=json.dumps(body), headers=headers)
         notification = NotificationStudent(student=student, message=message)
         notification.save()
-        print("HEre ============ > " + str(data))
         return HttpResponse("True")
     except Exception as e:
-        print("Error = >" + str(e))
         return HttpResponse("False")
 
 
@@ -661,8 +630,6 @@ def send_staff_notification(request):
         data = requests.post(url, data=json.dumps(body), headers=headers)
         notification = NotificationStaff(staff=staff, message=message)
         notification.save()
-        print("HEre ============ > " + str(data))
         return HttpResponse("True")
     except Exception as e:
-        print("Error = >" + str(e))
         return HttpResponse("False")

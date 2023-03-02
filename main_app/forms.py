@@ -14,6 +14,7 @@ class FormSettings(forms.ModelForm):
 
 class CustomUserForm(FormSettings):
     email = forms.EmailField(required=True)
+    gender = forms.ChoiceField(choices=[('M', 'Male'), ('F', 'Female')])
     first_name = forms.CharField(required=True)
     last_name = forms.CharField(required=True)
     password = forms.CharField(widget=forms.PasswordInput)
@@ -44,15 +45,13 @@ class CustomUserForm(FormSettings):
                 id=self.instance.pk).admin.email.lower()
             if dbEmail != formEmail:  # There has been changes
                 if CustomUser.objects.filter(email=formEmail).exists():
-                    raise forms.ValidationError(
-                        "The given email is already registered")
+                    raise forms.ValidationError("The given email is already registered")
 
         return formEmail
 
     class Meta:
         model = CustomUser
-        fields = ['first_name', 'last_name',
-                  'email', 'password', 'profile_pic', ]
+        fields = ['first_name', 'last_name', 'email', 'gender',  'password','profile_pic', ]
 
 
 class StudentForm(CustomUserForm):
@@ -62,7 +61,7 @@ class StudentForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Student
         fields = CustomUserForm.Meta.fields + \
-            ['course', 'gender', 'address', 'session']
+            ['course', 'address', 'session']
 
 
 class AdminForm(CustomUserForm):
@@ -81,7 +80,7 @@ class StaffForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Staff
         fields = CustomUserForm.Meta.fields + \
-            ['course', 'gender', 'address', ]
+            ['course', 'address', ]
 
 
 class CourseForm(FormSettings):
@@ -167,7 +166,7 @@ class StudentEditForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Student
         fields = CustomUserForm.Meta.fields + \
-            ['gender', 'address', ]
+            ['address', ]
 
 
 class StaffEditForm(CustomUserForm):
@@ -177,7 +176,7 @@ class StaffEditForm(CustomUserForm):
     class Meta(CustomUserForm.Meta):
         model = Staff
         fields = CustomUserForm.Meta.fields + \
-            ['gender', 'address', ]
+            ['address', ]
 
 
 class EditResultForm(FormSettings):

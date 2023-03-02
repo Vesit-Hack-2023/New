@@ -1,6 +1,7 @@
 import json
-from datetime import datetime
 import math
+from datetime import datetime
+
 from django.contrib import messages
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
@@ -17,8 +18,7 @@ def student_home(request):
     student = get_object_or_404(Student, admin=request.user)
     total_subject = Subject.objects.filter(course=student.course).count()
     total_attendance = AttendanceReport.objects.filter(student=student).count()
-    total_present = AttendanceReport.objects.filter(
-        student=student, status=True).count()
+    total_present = AttendanceReport.objects.filter(student=student, status=True).count()
     if total_attendance == 0:  # Don't divide. DivisionByZero
         percent_absent = percent_present = 0
     else:
@@ -162,18 +162,15 @@ def student_view_profile(request):
                 admin.first_name = first_name
                 admin.last_name = last_name
                 student.address = address
-                student.gender = gender
+                admin.gender = gender
                 admin.save()
                 student.save()
                 messages.success(request, "Profile Updated!")
                 return redirect(reverse('student_view_profile'))
             else:
                 messages.error(request, "Invalid Data Provided")
-                return render(request, "student_template/student_view_profile.html", context)
         except Exception as e:
-            messages.error(
-                request, "Error Occured While Updating Profile " + str(e))
-            return render(request, "student_template/student_view_profile.html", context)
+            messages.error(request, "Error Occured While Updating Profile " + str(e))
 
     return render(request, "student_template/student_view_profile.html", context)
 
@@ -198,3 +195,13 @@ def student_view_notification(request):
         'page_title': "View Notifications"
     }
     return render(request, "student_template/student_view_notification.html", context)
+
+
+def student_view_result(request):
+    student = get_object_or_404(Student, admin=request.user)
+    results = StudentResult.objects.filter(student=student)
+    context = {
+        'results': results,
+        'page_title': "View Results"
+    }
+    return render(request, "student_template/student_view_result.html", context)

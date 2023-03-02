@@ -8,25 +8,25 @@
         <div class="row">
             <div class="col-md-12">
                 <!-- general form elements -->
+                    <form method="POST">
+                        {% csrf_token %}
                 <div class="card card-primary">
                     <div class="card-header">
                         <h3 class="card-title">{{page_title}}</h3>
                     </div>
 
-                    {% if messages %}
-                    {% for message in messages  %}
-
-                    <div class="alert-{{message.tags}} alert">
-                        {{message}}
-                    </div>
-                    {% endfor %}
-                    {% endif %}
-
+       
                     <!-- /.card-header -->
                     <!-- form start -->
                     <div class="card-body">
 
-
+             {% if messages %}
+                    {% for message in messages  %}
+                    <div class="alert-{{message.tags}} alert">
+                        {{message}}
+                    </div>  
+                    {% endfor %}
+                    {% endif %}
 
                         <div class="form-group">
                             <label>Subject</label>
@@ -48,13 +48,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        {% comment %}
 
-                        <div>
-                            <label>Attendance Date</label>
-                            <input type="date" class='form-control' name="attendance_date" id='attendance_date' id="">
-                        </div>
-                        {% endcomment %}
 
                     </div>
                     <!-- /.card-body -->
@@ -66,6 +60,7 @@
 
                         </div>
                     </div>
+                </form>
                 </div>
                 <!-- /.card -->
 
@@ -101,13 +96,13 @@ if (subject.length  == 0 || session.length == 0){
                 if (json_data.length < 1) {
                     alert("No data to display")
                 } else {
-                    var div_data = "<hr/><div class='form-group'></div><div class='form-group'> <label>Attendance Date</label><input type='date' class='form-control' name='attendance_date' id='attendance_date' ><div class='row'>"
+                    var div_data = "<hr/><div class='form-group'> <label> Student List</label> <select class='student_list form-control' name='student_list'> "
 
                     for (key in json_data) {
-                        div_data += "<div class='col-lg-3'><div class='form-check custom-control custom-checkbox'><input type='checkbox' class='custom-control-input' checked='checked' name='student_data[]' value=" + json_data[key]['id'] + " id='checkbox" + json_data[key]['id'] + "' /> <label for='checkbox" + json_data[key]['id'] + "' class='custom-control-label'>" + json_data[key]['name'] + "</label></div> </div>"
+                        div_data += "<option value='" + json_data[key]['id'] + "'>" + json_data[key]['name'] + " </option>"
                     }
-                    div_data += "</div></div>"
-                    div_data += "<div class='form-group'><button id='save_attendance' class='btn btn-success' type='button'>Save Attendance</button></div>"
+                    div_data += "</select></div>"
+                    div_data += "<div class='form-group row'> <div class='col-md-6'> <label> Test Score </label> <input class='form-control' name='test' placeholder='Test Score' max='40' min='0' required type='number' /></div><div class='col-md-6'><label> Exam Score </label>  <input class='form-control' placeholder='Exam Score'  name='exam' max='60' min='0' required type='number' /> </div></div><div class='form-group'><button id='save_attendance' class='btn btn-success' type='submit'>Save Result</button></div></div>"
                     $("#student_data").html(div_data)
                 }
             }).fail(function (response) {
@@ -115,46 +110,6 @@ if (subject.length  == 0 || session.length == 0){
             })
 
 
-            $(document).on('click', '#save_attendance', function () {
-                $(this).attr("disabled","disabled")
-                $(this).text("Saving Attendance Data...")
-                var student_data = $("input[name='student_data[]']").map(function () {
-                    if ($(this).is(":checked")){
-                    return {'id':$(this).val(), 'status': 1};
-    
-                    }
-                    return {'id':$(this).val(), 'status': 0};
-    
-                }).get()
-                var attendance_date = $('#attendance_date').val()
-                if (attendance_date.length < 10){
-                    alert("Select date")
-                    return false;
-                }
-                student_data = JSON.stringify(student_data)
-                $.ajax({
-                    url: "{% url 'save_attendance' %}",
-                    type: 'POST',
-                    data: {
-                        date: attendance_date,
-                        student_ids: student_data,
-                        subject: subject,
-                        session: session
-            
-                    }
-                }).done(function (response) {
-                    if (response == 'OK'){
-                        alert("Saved")
-                    }else{
-                        alert("Error. Please try again")
-                    }
-                    location.reload()
-                    
-                }).fail(function (response) {
-                    alert("Error in saving attendance")
-                })
-    
-            })
 
 
         })

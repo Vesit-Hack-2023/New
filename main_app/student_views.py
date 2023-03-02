@@ -137,7 +137,7 @@ def student_feedback(request):
 
 def student_view_profile(request):
     student = get_object_or_404(Student, admin=request.user)
-    form = StudentEditForm(request.POST or None,
+    form = StudentEditForm(request.POST or None, request.FILES or None,
                            instance=student)
     context = {'form': form,
                'page_title': 'View/Edit Profile'
@@ -176,3 +176,25 @@ def student_view_profile(request):
             return render(request, "student_template/student_view_profile.html", context)
 
     return render(request, "student_template/student_view_profile.html", context)
+
+
+@csrf_exempt
+def student_fcmtoken(request):
+    token = request.POST.get('token')
+    student_user = get_object_or_404(CustomUser, id=request.user.id)
+    try:
+        student_user.fcm_token = token
+        student_user.save()
+        return HttpResponse("True")
+    except Exception as e:
+        return HttpResponse("False")
+
+
+def student_view_notification(request):
+    student = get_object_or_404(Student, admin=request.user)
+    notifications = NotificationStudent.objects.filter(student=student)
+    context = {
+        'notifications': notifications,
+        'page_title': "View Notifications"
+    }
+    return render(request, "student_template/student_view_notification.html", context)

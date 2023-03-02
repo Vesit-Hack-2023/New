@@ -61,11 +61,11 @@ def add_staff(request):
                 user = CustomUser.objects.create_user(
                     email=email, password=password, user_type=2, first_name=first_name, last_name=last_name, profile_pic=passport_url)
                 user.gender = gender
-                user.staff.address = address
+                user.address = address
                 user.staff.course = course
                 user.save()
                 messages.success(request, "Successfully Added")
-                return render(request, 'hod_template/add_staff_template.html', {'form': StaffForm()})
+                return redirect(reverse('add_staff'))
 
             except Exception as e:
                 messages.error(request, "Could Not Add " + str(e))
@@ -95,7 +95,7 @@ def add_student(request):
             try:
                 user = CustomUser.objects.create_user(email=email, password=password, user_type=3, first_name=first_name, last_name=last_name, profile_pic=passport_url)
                 user.gender = gender
-                user.student.address = address
+                user.address = address
                 user.student.session = session
                 user.student.course = course
                 user.save()
@@ -227,7 +227,7 @@ def edit_staff(request, staff_id):
                 user.first_name = first_name
                 user.last_name = last_name
                 user.gender = gender
-                staff.address = address
+                user.address = address
                 staff.course = course
                 user.save()
                 staff.save()
@@ -278,7 +278,7 @@ def edit_student(request, student_id):
                 user.last_name = last_name
                 student.session = session
                 user.gender = gender
-                student.address = address
+                user.address = address
                 student.course = course
                 user.save()
                 student.save()
@@ -566,7 +566,7 @@ def admin_view_profile(request):
 def admin_notify_staff(request):
     staff = CustomUser.objects.filter(user_type=2)
     context = {
-        'page_tite': "Send Notifications To Staff",
+        'page_title': "Send Notifications To Staff",
         'allStaff': staff
     }
     return render(request, "hod_template/staff_notification.html", context)
@@ -575,7 +575,7 @@ def admin_notify_staff(request):
 def admin_notify_student(request):
     student = CustomUser.objects.filter(user_type=3)
     context = {
-        'page_tite': "Send Notifications To Students",
+        'page_title': "Send Notifications To Students",
         'students': student
     }
     return render(request, "hod_template/student_notification.html", context)
